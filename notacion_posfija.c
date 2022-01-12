@@ -36,9 +36,8 @@ void push(Stack **top, char ch);
 char pop(Stack **top);
 char returnTop(Stack *top);
 bool isEmpty(Stack *top);
-void printStack(Stack *top);
+void print(Stack *top);
 void add(Stack **start, Stack **end, char ch);
-void printArray(Stack *start);
 bool in(char *array, char ch);
 int getIndex(char *array, char ch);
 void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, char operator);
@@ -65,7 +64,7 @@ int main(int argc, char const *argv[])
 	for (int i = 0; i < strlen(expr); ++i)
 	{
 		if ( (isNumeric(expr[i]) | (isLetter(expr[i]))) ) 
-			add(&start, &end, expr[i]); //if is a number or lowercase letter, add it to the queue-array
+			add(&start, &end, expr[i]); //if is a number, lowercase letter or uppercase letter, add it to the queue-array
 		if (expr[i] == '(')
 			push(&top, expr[i]);
 		// the current character is an operator
@@ -133,7 +132,7 @@ int main(int argc, char const *argv[])
 
 	printf("\nInfix notation: %s\n", expr);
 	printf("Postfix notation: ");
-	printArray(start);
+	print(start);
 	printf("\n");
 
 	printf("\nResult after evaluating the expression: %d\n", processArray(start, operators));
@@ -203,12 +202,12 @@ bool isEmpty(Stack *top)
 	return false;
 }
 
-void printStack(Stack *top)
+void print(Stack *top)
 {
 	if (top == NULL)
 		return;
 	printf("%c", top->data);
-	printStack(top->next);
+	print(top->next);
 }
 
 void add(Stack **start, Stack **end, char ch)
@@ -224,14 +223,6 @@ void add(Stack **start, Stack **end, char ch)
 	else
 		(*end)->next = newNode;
 	*end = newNode;
-}
-
-void printArray(Stack *start)
-{
-	if (start == NULL)
-		return;
-	printf("%c", start->data);
-	printArray(start->next);
 }
 
 bool in(char *array, char ch)
