@@ -24,13 +24,6 @@ typedef struct NodeStack
 	struct NodeStack *next;
 }Stack;
 
-//struct for the queue-array
-typedef struct Node
-{
-	char data;
-	struct Node *next;
-}ArrayList;
-
 //struct for a int stack
 typedef struct eStack
 {
@@ -42,27 +35,24 @@ Stack *newElement(char ch);
 void push(Stack **top, char ch);
 char pop(Stack **top);
 char returnTop(Stack *top);
-bool isEmptyStack(Stack *top);
+bool isEmpty(Stack *top);
 void printStack(Stack *top);
-ArrayList *newElem(char ch);
-void add(ArrayList **start, ArrayList **end, char ch);
-char del(ArrayList **start);
-bool isEmptyArray(ArrayList *start);
-void printArray(ArrayList *start);
+void add(Stack **start, Stack **end, char ch);
+void printArray(Stack *start);
 bool in(char *array, char ch);
 int getIndex(char *array, char ch);
-void fromStackToArray(Stack **top, ArrayList **start, ArrayList **end, char *operators, char operator);
+void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, char operator);
 intStack *new(int n);
 void pushStack(intStack **top, int n);
 int popStack(intStack **top);
-int processArray(ArrayList *start, char *operators);
+int processArray(Stack *start, char *operators);
 
 int main(int argc, char const *argv[])
 {
 	char expr[MAX_BUFFER];
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	Stack *top;
-	ArrayList *start, *end;
+	Stack *start, *end; //to manage it like an queue
 
 	top  = NULL;
 	start = end = NULL;
@@ -79,7 +69,7 @@ int main(int argc, char const *argv[])
 		// the current character is an operator
 		if ( in(operators, expr[i]) )
 		{
-			if (isEmptyStack(top))
+			if (isEmpty(top))
 				push(&top, expr[i]);
 			else
 			{
@@ -120,7 +110,7 @@ int main(int argc, char const *argv[])
 		if (expr[i] == ')')
 		{
 			char ch_aux;
-			while (!isEmptyStack(top))
+			while (!isEmpty(top))
 			{
 				if (returnTop(top) == '(')
 				{
@@ -133,7 +123,7 @@ int main(int argc, char const *argv[])
 		}
 	}
 
-	while (!isEmptyStack(top)) 
+	while (!isEmpty(top)) 
 	{	
 		char ch_aux = pop(&top);
 		add(&start, &end, ch_aux);
@@ -196,7 +186,7 @@ char returnTop(Stack *top)
 	return top->data;
 }
 
-bool isEmptyStack(Stack *top)
+bool isEmpty(Stack *top)
 {
 	if (top == NULL)
 		return true;
@@ -211,22 +201,9 @@ void printStack(Stack *top)
 	printStack(top->next);
 }
 
-ArrayList *newElem(char ch)
+void add(Stack **start, Stack **end, char ch)
 {
-	ArrayList *new = (ArrayList *) malloc(sizeof(ArrayList));
-	if (!new)
-	{
-		printf("\nError trying to allocate memory.\n");
-		return NULL;
-	}
-	new->data = ch;
-	new->next = NULL;
-	return new;
-}
-
-void add(ArrayList **start, ArrayList **end, char ch)
-{
-	ArrayList *newNode = newElem(ch);
+	Stack *newNode = newElement(ch);
 	if (!newNode)
 	{
 		printf("\nCannot add the element into the queue.\n");
@@ -239,28 +216,7 @@ void add(ArrayList **start, ArrayList **end, char ch)
 	*end = newNode;
 }
 
-char del(ArrayList **start)
-{
-	if (*start == NULL)
-		{
-			printf("\nERROR: Trying to delete on empty ArrayList.\n");
-			return '\0';
-		}
-	ArrayList *toDelete = *start;
-	char n = toDelete->data;
-	*start = (*start)->next;
-	free(toDelete);
-	return n;
-}
-
-bool isEmptyList(ArrayList *start)
-{
-	if (start == NULL)
-		return true;
-	return false;
-}
-
-void printArray(ArrayList *start)
+void printArray(Stack *start)
 {
 	if (start == NULL)
 		return;
@@ -288,9 +244,9 @@ int getIndex(char *array, char ch)
 	return -1;
 }
 
-void fromStackToArray(Stack **top, ArrayList **start, ArrayList **end, char *operators, char operator)
+void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, char operator)
 {
-	while (!isEmptyStack(*top) & returnTop(*top) != '(' & (getIndex(operators, returnTop(*top)) >= getIndex(operators, operator)) )
+	while (!isEmpty(*top) & returnTop(*top) != '(' & (getIndex(operators, returnTop(*top)) >= getIndex(operators, operator)) )
 	{
 		char topChar = pop(&*top);
 		add(&*start, &*end, topChar);
@@ -328,7 +284,7 @@ int popStack(intStack **top)
 	if (*top == NULL)
 	{
 		printf("\nERROR: Trying to pop on empty stack.\n");
-		return '\0';
+		return -1;
 	}
 	intStack *toDelete = *top;
 	int n = toDelete->data;
@@ -338,7 +294,7 @@ int popStack(intStack **top)
 }
 
 
-int processArray(ArrayList *start, char *operators)
+int processArray(Stack *start, char *operators)
 {
 	intStack *aux = NULL;
 	int n1, n2, result = 0;
