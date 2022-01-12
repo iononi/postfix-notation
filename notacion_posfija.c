@@ -31,6 +31,13 @@ typedef struct Node
 	struct Node *next;
 }ArrayList;
 
+//struct for a int stack
+typedef struct eStack
+{
+	int data;
+	struct eStack *next;
+}intStack;
+
 Stack *newElement(char ch);
 void push(Stack **top, char ch);
 char pop(Stack **top);
@@ -44,16 +51,20 @@ bool isEmptyArray(ArrayList *start);
 void printArray(ArrayList *start);
 bool in(char *array, char ch);
 int getIndex(char *array, char ch);
-void fromStackToArray(Stack *top, ArrayList *start, ArrayList *end, char *operators, char operator);
+void fromStackToArray(Stack **top, ArrayList **start, ArrayList **end, char *operators, char operator);
+intStack *new(int n);
+void pushStack(intStack **top, int n);
+int popStack(intStack **top);
+int processArray(ArrayList *start, char *operators);
 
 int main(int argc, char const *argv[])
 {
 	char expr[MAX_BUFFER];
-	char operators[] = {'(', '-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
-	Stack *top, *aux;
+	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
+	Stack *top;
 	ArrayList *start, *end;
 
-	top = aux = NULL;
+	top  = NULL;
 	start = end = NULL;
 
 	printf("Please, write the expression you want to evaluate: ");
@@ -61,24 +72,50 @@ int main(int argc, char const *argv[])
 
 	for (int i = 0; i < strlen(expr); ++i)
 	{
-		if (expr[i] >= 48 && expr[i] <= 57)
-			add(&start, &end, expr[i]); //if is a number, I add it to the queue-array
+		if ( (expr[i] >= 48 && expr[i] <= 57) | (expr[i] >= 97 && expr[i] <= 122) ) 
+			add(&start, &end, expr[i]); //if is a number or lowercase letter, add it to the queue-array
+		if (expr[i] == '(')
+			push(&top, expr[i]);
+		// the current character is an operator
 		if ( in(operators, expr[i]) )
 		{
-			/*if the index of the top element is smallest than the index of the current character
-			based on the operators array, then the current character have higher priority*/
-			if (isEmptyStack(top) || (getIndex(operators, returnTop(top)) < getIndex(operators, expr[i])) )
+			if (isEmptyStack(top))
 				push(&top, expr[i]);
 			else
 			{
-				//check operators priority level
-				if ( expr[i] == '+' && returnTop(top) == '-')
-					fromStackToArray(top, start, end, operators, expr[i]);	
-				if (expr[i] == '-' && returnTop(top) == '+')
-					fromStackToArray(top, start, end, operators, expr[i]);	
+				// check operator priority level
+				/* if current operator and top element has same priority level, unstack each element and add it
+					to the queue-array until the first condition is met: empty stack, open parenthesis or higher
+					priority operator*/
+				if ( (expr[i] == '+' && returnTop(top) == '-') | (expr[i] == '-' && returnTop(top) == '+') )
+				{
+					fromStackToArray(&top, &start, &end, operators, expr[i]);
+					push(&top, expr[i]);
+					continue;	
+				}
+				if ( (expr[i] == '*' && returnTop(top) == '/') || (expr[i] == '/' && returnTop(top) == '*') )
+				{
+					fromStackToArray(&top, &start, &end, operators, expr[i]);
+					push(&top, expr[i]);
+					continue;	
+				}
+
+				// if the top element has lower priority, push the current element into the stack
+				if ( getIndex(operators, returnTop(top)) < getIndex(operators, expr[i]) )
+				{
+					push(&top, expr[i]);
+					continue;
+				}
+				/*if top element has higher priority, unstack from the stack until stack is empty, lower priority operator, or an open
+				parenthesis is found and add each element to the array, then push the current element*/
 				if ( getIndex(operators, returnTop(top)) >= getIndex(operators, expr[i]) )
-					fromStackToArray(top, start, end, operators, expr[i]);
+				{
+					fromStackToArray(&top, &start, &end, operators, expr[i]);
+					push(&top, expr[i]);
+				}
+
 			}
+			
 		}
 		if (expr[i] == ')')
 		{
@@ -88,28 +125,26 @@ int main(int argc, char const *argv[])
 				if (returnTop(top) == '(')
 				{
 					pop(&top);
-					while (!isEmptyStack(aux))
-					{
-						ch_aux = pop(&aux);
-						push(&top, ch_aux);
-					}
 					break;
 				}
-				else
-				{
-					ch_aux = pop(&top);
-					push(&aux, ch_aux);	
-				}
+				ch_aux = pop(&top);
+				add(&start, &end, ch_aux);	
 			}
 		}
-		
-
 	}
 
-	printf("Printing ArrayList...\n");
+	while (!isEmptyStack(top)) 
+	{	
+		char ch_aux = pop(&top);
+		add(&start, &end, ch_aux);
+	}
+
+	printf("\nInfix notation: %s\n", expr);
+	printf("Postfix notation: ");
 	printArray(start);
-	printf("Printing Stack...\n");
-	printStack(top);
+	printf("\n");
+
+	printf("\nResult after evaluating the expression: %d\n", processArray(start, operators));
 
 	return 0;
 }
@@ -131,7 +166,10 @@ void push(Stack **top, char ch)
 {
 	Stack *newNode = newElement(ch);
 	if (!newNode)
+	{
 		printf("\nCannot push the element into the stack.\n");
+		return;
+	}
 	if (*top != NULL)
 		newNode->next = *top;
 	*top = newNode;
@@ -168,11 +206,8 @@ bool isEmptyStack(Stack *top)
 void printStack(Stack *top)
 {
 	if (top == NULL)
-	{
-		printf("\nEnd of stack.\n");
 		return;
-	}
-	printf("%2c", top->data);
+	printf("%c", top->data);
 	printStack(top->next);
 }
 
@@ -207,10 +242,10 @@ void add(ArrayList **start, ArrayList **end, char ch)
 char del(ArrayList **start)
 {
 	if (*start == NULL)
-	{
-		printf("\nERROR: Trying to delete on empty ArrayList.\n");
-		return '\0';
-	}
+		{
+			printf("\nERROR: Trying to delete on empty ArrayList.\n");
+			return '\0';
+		}
 	ArrayList *toDelete = *start;
 	char n = toDelete->data;
 	*start = (*start)->next;
@@ -228,11 +263,8 @@ bool isEmptyList(ArrayList *start)
 void printArray(ArrayList *start)
 {
 	if (start == NULL)
-	{
-		printf("\nEnd of queue-array.\n");
 		return;
-	}
-	printf("%2c", start->data);
+	printf("%c", start->data);
 	printArray(start->next);
 }
 
@@ -256,11 +288,86 @@ int getIndex(char *array, char ch)
 	return -1;
 }
 
-void fromStackToArray(Stack *top, ArrayList *start, ArrayList *end, char *operators, char operator)
+void fromStackToArray(Stack **top, ArrayList **start, ArrayList **end, char *operators, char operator)
 {
-	while (!isEmptyStack(top) & returnTop(top) != '(' & (getIndex(operators, returnTop(top)) >= getIndex(operators, operator)) )
+	while (!isEmptyStack(*top) & returnTop(*top) != '(' & (getIndex(operators, returnTop(*top)) >= getIndex(operators, operator)) )
 	{
-		char topChar = pop(&top);
-		add(&start, &end, topChar);
+		char topChar = pop(&*top);
+		add(&*start, &*end, topChar);
 	}	
+}
+
+intStack *new(int n)
+{
+	intStack *new = (intStack *) malloc(sizeof(intStack));
+	if (!new)
+	{
+		printf("\nError trying to allocate memory.\n");
+		return NULL;
+	}
+	new->data = n;
+	new->next = NULL;
+	return new;
+}
+
+void pushStack(intStack **top, int n)
+{
+	intStack *newNode = new(n);
+	if (!newNode)
+	{
+		printf("\nCannot push the element into the stack.\n");
+		return;
+	}
+	if (*top != NULL)
+		newNode->next = *top;
+	*top = newNode;
+}
+
+int popStack(intStack **top)
+{
+	if (*top == NULL)
+	{
+		printf("\nERROR: Trying to pop on empty stack.\n");
+		return '\0';
+	}
+	intStack *toDelete = *top;
+	int n = toDelete->data;
+	*top = (*top)->next;
+	free(toDelete);
+	return n;
+}
+
+
+int processArray(ArrayList *start, char *operators)
+{
+	intStack *aux = NULL;
+	int n1, n2, result = 0;
+
+	while (start != NULL)
+	{
+		if ( (start->data) >= 48 && (start->data <= 57) )
+			pushStack(&aux, atoi(&start->data));
+		if ( in(operators, start->data) )
+		{ 
+			n1 = popStack(&aux); n2 = popStack(&aux);
+			switch( start->data )
+			{
+				case '-': result = n2 - n1;
+				break;
+				case '+': result = n2 + n1;
+				break;
+				case '*': result = n2 * n1;
+				break;
+				case '/': result = n2 / n1;
+				break;
+				case '^': result = n2 ^ n1;
+				break;
+			}
+
+			pushStack(&aux, result);
+		}
+		start = start->next;
+	}
+	n1 = popStack(&aux);
+	return n1;
 }
