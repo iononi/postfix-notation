@@ -46,6 +46,8 @@ intStack *new(int n);
 void pushStack(intStack **top, int n);
 int popStack(intStack **top);
 int processArray(Stack *start, char *operators);
+bool isNumeric(char ch);
+bool isLetter(char ch);
 
 int main(int argc, char const *argv[])
 {
@@ -62,7 +64,7 @@ int main(int argc, char const *argv[])
 
 	for (int i = 0; i < strlen(expr); ++i)
 	{
-		if ( (expr[i] >= 48 && expr[i] <= 57) | (expr[i] >= 97 && expr[i] <= 122) ) 
+		if ( (isNumeric(expr[i]) | (isLetter(expr[i]))) ) 
 			add(&start, &end, expr[i]); //if is a number or lowercase letter, add it to the queue-array
 		if (expr[i] == '(')
 			push(&top, expr[i]);
@@ -139,6 +141,9 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
+/* Allocates memory for new Stack node. 
+	If memory allocation was possible, return the new node, return NULL otherwise
+*/
 Stack *newElement(char ch)
 {
 	Stack *new = (Stack *) malloc(sizeof(Stack));
@@ -152,6 +157,9 @@ Stack *newElement(char ch)
 	return new;
 }
 
+/* Creates a new Stack node, if creation was successful, 
+	insert the node into the stack, print an error message otherwise.
+*/
 void push(Stack **top, char ch)
 {
 	Stack *newNode = newElement(ch);
@@ -165,9 +173,11 @@ void push(Stack **top, char ch)
 	*top = newNode;
 }
 
+/* Delete the top element in the stack and returns it, prints an error message otherwise.
+*/
 char pop(Stack **top)
 {
-	if (*top == NULL)
+	if (isEmpty(*top))
 	{
 		printf("\nERROR: Trying to pop on empty stack.\n");
 		return '\0';
@@ -181,7 +191,7 @@ char pop(Stack **top)
 
 char returnTop(Stack *top)
 {
-	if (top == NULL)
+	if ( isEmpty(top) )
 		return '\0';
 	return top->data;
 }
@@ -299,9 +309,9 @@ int processArray(Stack *start, char *operators)
 	intStack *aux = NULL;
 	int n1, n2, result = 0;
 
-	while (start != NULL)
+	while (!isEmpty(start))
 	{
-		if ( (start->data) >= 48 && (start->data <= 57) )
+		if ( isNumeric(start->data) )
 			pushStack(&aux, atoi(&start->data));
 		if ( in(operators, start->data) )
 		{ 
@@ -326,4 +336,18 @@ int processArray(Stack *start, char *operators)
 	}
 	n1 = popStack(&aux);
 	return n1;
+}
+
+bool isNumeric(char ch)
+{
+	if (ch >= 48 && ch <= 57)
+		return true;
+	return false;
+}
+
+bool isLetter(char ch)
+{
+	if ( (ch >= 65 && ch <= 90) | (ch >= 97 && ch <= 122) )
+		return true;
+	return false;
 }
