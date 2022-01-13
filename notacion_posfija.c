@@ -57,6 +57,7 @@ int main(int argc, char const *argv[])
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	Stack *top;
 	Stack *start, *end; //to manage it like an queue
+	int result;
 
 	top  = NULL;
 	start = end = NULL;
@@ -138,13 +139,15 @@ int main(int argc, char const *argv[])
 	print(start);
 	printf("\n");
 
-	printf("\nResult after evaluating the expression: %d\n", processArray(start, operators));
+	result = processArray(start, operators);
+
+	(result == -1) ? printf("\nSomething went wrong while proccesing the Array\n") : printf("\nResult after evaluating the expression: %d\n", result);
 
 	return 0;
 }
 
 /* Allocates memory for new Stack node. 
-	If memory allocation was possible, return the new node, return NULL otherwise
+	If memory allocation was possible, return the new node, return NULL otherwise.
 */
 Stack *newElement(char ch)
 {
@@ -191,6 +194,7 @@ char pop(Stack **top)
 	return ch;
 }
 
+// Returns the stack top element but does not delete it, return NULL (in its ASCII representation) otherwise.
 char returnTop(Stack *top)
 {
 	if ( isEmpty(top) )
@@ -321,17 +325,26 @@ int popStack(intStack **top)
 int processArray(Stack *start, char *operators)
 {
 	intStack *aux = NULL;
-	int n1, n2, result = 0, size = count(start);
-	char *temp = (char *) calloc(size, sizeof(char));
+	int n1, n2, result = 0;
+	char *temp;
 
 	while (!isEmpty(start))
 	{
+		bool allocate = true;
 		while ( start->digit != NULL )
 		{
+			if (allocate)
+			{
+				int size = count(start);
+				temp = (char *)calloc(size, sizeof(char));
+				if (!temp)
+					return -1;
+			}
 			strncat(temp, &start->data, 1);
 			if ( (start->next)->digit == NULL )
-			{ start = start->next; strncat(temp, &start->data, 1); pushStack(&aux, atoi(temp)); start = start->next; break; }
+			{ start = start->next; strncat(temp, &start->data, 1); pushStack(&aux, atoi(temp)); start = start->next; free(temp); break; }
 			start = start->digit;
+			allocate = false;
 		}
 		if ( isNumeric(start->data) )
 			pushStack(&aux, atoi(&start->data));
@@ -356,8 +369,8 @@ int processArray(Stack *start, char *operators)
 		}
 		start = start->next;
 	}
+
 	n1 = popStack(&aux);
-	free(temp);
 	return n1;
 }
 
