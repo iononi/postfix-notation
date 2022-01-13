@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <stdbool.h>
 #define MAX_BUFFER 100
 
@@ -361,7 +362,7 @@ int processArray(Stack *start, char *operators)
 				break;
 				case '/': result = n2 / n1;
 				break;
-				case '^': result = n2 ^ n1;
+				case '^': result = pow(n2, n1);
 				break;
 			}
 
