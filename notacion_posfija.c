@@ -137,7 +137,6 @@ int main(int argc, char const *argv[])
 	printf("Postfix notation: ");
 	print(start);
 	printf("\n");
-	//printf("Array size: %d\n", count(start, operators));
 
 	printf("\nResult after evaluating the expression: %d\n", processArray(start, operators));
 
@@ -237,7 +236,7 @@ void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
 		printf("\nCannot add the element into the queue.\n");
 		return;
 	}
-	if ( isNumeric(expression[(*index) + 1]) )
+	while ( isNumeric(expression[(*index) + 1]) )
 		{
 			(*end)->digit = newElement(expression[(*index) + 1]);
 			if (!(*end)->digit)
@@ -325,18 +324,15 @@ int processArray(Stack *start, char *operators)
 	int n1, n2, result = 0, size = count(start);
 	char *temp = (char *) calloc(size, sizeof(char));
 
-	while ( start->digit != NULL )
-	{
-		strncat(temp, &start->data, 1);
-		if ( (start->next)->digit == NULL )
-		{ strncat(temp, &(start->next)->data, 1); pushStack(&aux, atoi(temp)); break; }
-		start = start->digit;
-	}
-
-	printf("temp content as a number: %d\n", atoi(temp));
-
 	while (!isEmpty(start))
 	{
+		while ( start->digit != NULL )
+		{
+			strncat(temp, &start->data, 1);
+			if ( (start->next)->digit == NULL )
+			{ start = start->next; strncat(temp, &start->data, 1); pushStack(&aux, atoi(temp)); start = start->next; break; }
+			start = start->digit;
+		}
 		if ( isNumeric(start->data) )
 			pushStack(&aux, atoi(&start->data));
 		if ( in(operators, start->data) )
