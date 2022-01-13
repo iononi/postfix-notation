@@ -48,6 +48,7 @@ int popStack(intStack **top);
 int processArray(Stack *start, char *operators);
 bool isNumeric(char ch);
 bool isLetter(char ch);
+int count(Stack *start);
 
 
 int main(int argc, char const *argv[])
@@ -231,7 +232,7 @@ int add(Stack **start, Stack **end, char ch)
 
 void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
 {
-	if (!add(&*start, &*end, ch) == 0)
+	if (add(&*start, &*end, ch) != 0)
 	{
 		printf("\nCannot add the element into the queue.\n");
 		return;
@@ -244,7 +245,7 @@ void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
 				printf("\nCannot add the element into the queue.\n");
 				return;
 			}
-			*end = (*end)->digit; (*index)++;
+			(*end)->next = (*end)->digit; *end = (*end)->digit; (*index)++;
 		}
 }
 
@@ -321,7 +322,18 @@ int popStack(intStack **top)
 int processArray(Stack *start, char *operators)
 {
 	intStack *aux = NULL;
-	int n1, n2, result = 0;
+	int n1, n2, result = 0, size = count(start);
+	char *temp = (char *) calloc(size, sizeof(char));
+
+	while ( start->digit != NULL )
+	{
+		strncat(temp, &start->data, 1);
+		if ( (start->next)->digit == NULL )
+		{ strncat(temp, &(start->next)->data, 1); pushStack(&aux, atoi(temp)); break; }
+		start = start->digit;
+	}
+
+	printf("temp content as a number: %d\n", atoi(temp));
 
 	while (!isEmpty(start))
 	{
@@ -349,6 +361,7 @@ int processArray(Stack *start, char *operators)
 		start = start->next;
 	}
 	n1 = popStack(&aux);
+	free(temp);
 	return n1;
 }
 
@@ -366,3 +379,9 @@ bool isLetter(char ch)
 	return false;
 }
 
+int count(Stack *start)
+{
+	if (isEmpty(start))
+		return 0;
+	return 1 + count(start->digit);
+}
