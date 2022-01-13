@@ -21,10 +21,10 @@
 typedef struct NodeStack
 {
 	char data;
-	struct NodeStack *next;
+	struct NodeStack *next, *digit;
 }Stack;
 
-//struct for a int stack
+//struct for an int stack
 typedef struct eStack
 {
 	int data;
@@ -37,7 +37,8 @@ char pop(Stack **top);
 char returnTop(Stack *top);
 bool isEmpty(Stack *top);
 void print(Stack *top);
-void add(Stack **start, Stack **end, char ch);
+int add(Stack **start, Stack **end, char ch);
+void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index);
 bool in(char *array, char ch);
 int getIndex(char *array, char ch);
 void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, char operator);
@@ -47,6 +48,7 @@ int popStack(intStack **top);
 int processArray(Stack *start, char *operators);
 bool isNumeric(char ch);
 bool isLetter(char ch);
+
 
 int main(int argc, char const *argv[])
 {
@@ -63,8 +65,8 @@ int main(int argc, char const *argv[])
 
 	for (int i = 0; i < strlen(expr); ++i)
 	{
-		if ( (isNumeric(expr[i]) | (isLetter(expr[i]))) ) 
-			add(&start, &end, expr[i]); //if is a number, lowercase letter or uppercase letter, add it to the queue-array
+		if ( isNumeric(expr[i]) ) 
+			addDigit(&start, &end, expr[i], expr, &i);
 		if (expr[i] == '(')
 			push(&top, expr[i]);
 		// the current character is an operator
@@ -134,6 +136,7 @@ int main(int argc, char const *argv[])
 	printf("Postfix notation: ");
 	print(start);
 	printf("\n");
+	//printf("Array size: %d\n", count(start, operators));
 
 	printf("\nResult after evaluating the expression: %d\n", processArray(start, operators));
 
@@ -152,7 +155,7 @@ Stack *newElement(char ch)
 		return NULL;
 	}
 	new->data = ch;
-	new->next = NULL;
+	new->next = new->digit = NULL;
 	return new;
 }
 
@@ -210,19 +213,39 @@ void print(Stack *top)
 	print(top->next);
 }
 
-void add(Stack **start, Stack **end, char ch)
+int add(Stack **start, Stack **end, char ch)
 {
 	Stack *newNode = newElement(ch);
 	if (!newNode)
 	{
 		printf("\nCannot add the element into the queue.\n");
-		return;
+		return -1;
 	}
-	if (*start == NULL)
+	if (isEmpty(*start))
 		*start = *end = newNode;
 	else
 		(*end)->next = newNode;
 	*end = newNode;
+	return 0;
+}
+
+void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
+{
+	if (!add(&*start, &*end, ch) == 0)
+	{
+		printf("\nCannot add the element into the queue.\n");
+		return;
+	}
+	if ( isNumeric(expression[(*index) + 1]) )
+		{
+			(*end)->digit = newElement(expression[(*index) + 1]);
+			if (!(*end)->digit)
+			{
+				printf("\nCannot add the element into the queue.\n");
+				return;
+			}
+			*end = (*end)->digit; (*index)++;
+		}
 }
 
 bool in(char *array, char ch)
@@ -342,3 +365,4 @@ bool isLetter(char ch)
 		return true;
 	return false;
 }
+
