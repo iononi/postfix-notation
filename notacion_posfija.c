@@ -56,8 +56,9 @@ Stack *postfix(char *expression);
 int main(int argc, char const *argv[])
 {
 	char expr[MAX_BUFFER];
-	int op, result;
 	Stack *pos;
+	int result, op;
+	
 
 	printf("Please, write the expression you want to evaluate: ");
 	fgets(expr, MAX_BUFFER, stdin);
@@ -369,13 +370,12 @@ Stack *postfix(char *expression)
 	Stack *start, *end; //to manage it like an queue
 	int result;
 
-	top = start = end = NULL;
+	top  = NULL;
+	start = end = NULL;
 	for (int i = 0; i < strlen(expression); ++i)
 	{
 		if ( isNumeric(expression[i]) ) 
 			addDigit(&start, &end, expression[i], expression, &i);
-		if ( isLetter(expression[i]) )
-			add(&start, &end, expression[i]);
 		if (expression[i] == '(')
 			push(&top, expression[i]);
 		// the current character is an operator
