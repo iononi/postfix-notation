@@ -142,6 +142,7 @@ char returnTop(Stack *top)
 	return top->data;
 }
 
+// Check if the stack passed as parameter is empty. Return true if the stack is empty, return false otherwise.
 bool isEmpty(Stack *top)
 {
 	if (top == NULL)
@@ -149,6 +150,7 @@ bool isEmpty(Stack *top)
 	return false;
 }
 
+// Print the stack/queue content.
 void print(Stack *top)
 {
 	if (top == NULL)
@@ -157,6 +159,7 @@ void print(Stack *top)
 	print(top->next);
 }
 
+// Add a new element into the queue. Return 0 if the element was added, return -1 otherwise
 int add(Stack **start, Stack **end, char ch)
 {
 	Stack *newNode = newElement(ch);
@@ -173,6 +176,7 @@ int add(Stack **start, Stack **end, char ch)
 	return 0;
 }
 
+// If next element in expression array is numeric, add it to the queue but linked with the previous node
 void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
 {
 	if (add(&*start, &*end, ch) != 0)
@@ -192,6 +196,7 @@ void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
 		}
 }
 
+// Check if character ch is in array. Return true if ch is in array, false otherwise.
 bool in(char *array, char ch)
 {
 	for (int i = 0; i < strlen(array); ++i)
@@ -202,6 +207,7 @@ bool in(char *array, char ch)
 	return false;
 }
 
+// Return the index of ch in array, return -1 if ch is not in array.
 int getIndex(char *array, char ch)
 {
 	for (int i = 0; i < strlen(array); ++i)
@@ -212,6 +218,11 @@ int getIndex(char *array, char ch)
 	return -1;
 }
 
+/* Insert the elements of the stack top into the queue pointed by start.
+   This happens when operators has the same priority level, in addition/substraction and
+   multiplication/division cases, or the top of the top stack contains a operator with 
+   equal or higher priority level than the current operator.
+*/
 void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, char operator)
 {
 	while (!isEmpty(*top) & returnTop(*top) != '(' & (getIndex(operators, returnTop(*top)) >= getIndex(operators, operator)) )
@@ -221,6 +232,7 @@ void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, 
 	}	
 }
 
+// Allocates memory for an intStack node. Return the new node if allocation was successful, return NULL otherwise.
 intStack *new(int n)
 {
 	intStack *new = (intStack *) malloc(sizeof(intStack));
@@ -234,6 +246,7 @@ intStack *new(int n)
 	return new;
 }
 
+// Insert a new element into the int stack.
 void pushStack(intStack **top, int n)
 {
 	intStack *newNode = new(n);
@@ -247,6 +260,7 @@ void pushStack(intStack **top, int n)
 	*top = newNode;
 }
 
+// Delete the top element from the int stack and return it. Return -1 otherwise.
 int popStack(intStack **top)
 {
 	if (*top == NULL)
@@ -261,7 +275,13 @@ int popStack(intStack **top)
 	return n;
 }
 
-
+/* Processes the queue when it cointains the postfix notation.
+   Iterates over the queue and check if the digit pointer of the current node is <> NULL,
+   in that case, means that we have a number with two or more digits so it concatenates 
+   the elements linked by the digit  pointer into an array to apply atoi() function later
+   and get the full number. If the number has no linked nodes, it just push it into the stack.
+   Return the expression result if everything went OK, and returns -1 if an error occurr.
+*/
 int processArray(Stack *start)
 {
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
@@ -315,6 +335,7 @@ int processArray(Stack *start)
 	return n1;
 }
 
+// Return true if character ch is in range 0-9, return false otherwise.
 bool isNumeric(char ch)
 {
 	if (ch >= 48 && ch <= 57)
@@ -322,6 +343,7 @@ bool isNumeric(char ch)
 	return false;
 }
 
+// Return true if character ch is in range a-z or A-Z, return false otherwise.
 bool isLetter(char ch)
 {
 	if ( (ch >= 65 && ch <= 90) | (ch >= 97 && ch <= 122) )
@@ -329,6 +351,9 @@ bool isLetter(char ch)
 	return false;
 }
 
+/* Count how many digits are linked in the queue to allocate that space in memory
+   to process the whole number.
+*/
 int count(Stack *start)
 {
 	if (isEmpty(start))
@@ -336,6 +361,7 @@ int count(Stack *start)
 	return 1 + count(start->digit);
 }
 
+// Get postfix notation from expression, that may be given in infix notation to work correctly.
 Stack *postfix(char *expression)
 {
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
