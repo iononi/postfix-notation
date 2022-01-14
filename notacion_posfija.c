@@ -46,22 +46,42 @@ void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, 
 intStack *new(int n);
 void pushStack(intStack **top, int n);
 int popStack(intStack **top);
-int processArray(Stack *start, char *operators);
+int processArray(Stack *start);
 bool isNumeric(char ch);
 bool isLetter(char ch);
 int count(Stack *start);
-void postfix(char *expression);
+Stack *postfix(char *expression);
 
 
 int main(int argc, char const *argv[])
 {
 	char expr[MAX_BUFFER];
-	
+	int op, result;
+	Stack *pos;
 
 	printf("Please, write the expression you want to evaluate: ");
 	fgets(expr, MAX_BUFFER, stdin);
 
 	postfix(expr);
+
+	printf("\nWhat do you want to do next?\n%s\n%s\nType an option: ", "1. Get and evaluate postfix notation", "2. Get postfix notation only");
+
+	scanf("%d", &op);
+
+	switch (op)
+	{
+		case 1: pos = postfix(expr);
+				printf("\nInfix notation: %s\n", expr);
+				printf("Postfix notation: "); print(pos);
+				result = processArray(pos);
+				printf( (result == -1) ? "\n\nSomething went wrong while processing postfix notation\n\n" : "\n\nResult after evualating the expression: %d\n\n", result );
+		break;
+		case 2: pos = postfix(expr);
+				printf("\nInfix notation: %s\n", expr);
+				printf("Postfix notation: "); print(pos); printf("\n\n");
+		break;
+		default: printf("\nType a valid option\n");
+	}
 
 	return 0;
 }
@@ -242,8 +262,9 @@ int popStack(intStack **top)
 }
 
 
-int processArray(Stack *start, char *operators)
+int processArray(Stack *start)
 {
+	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	intStack *aux = NULL;
 	int n1, n2, result = 0;
 	char *temp;
@@ -315,19 +336,20 @@ int count(Stack *start)
 	return 1 + count(start->digit);
 }
 
-void postfix(char *expression)
+Stack *postfix(char *expression)
 {
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	Stack *top;
 	Stack *start, *end; //to manage it like an queue
 	int result;
 
-	top  = NULL;
-	start = end = NULL;
+	top = start = end = NULL;
 	for (int i = 0; i < strlen(expression); ++i)
 	{
 		if ( isNumeric(expression[i]) ) 
 			addDigit(&start, &end, expression[i], expression, &i);
+		if ( isLetter(expression[i]) )
+			add(&start, &end, expression[i]);
 		if (expression[i] == '(')
 			push(&top, expression[i]);
 		// the current character is an operator
@@ -393,12 +415,5 @@ void postfix(char *expression)
 		add(&start, &end, ch_aux);
 	}
 
-	printf("\nInfix notation: %s\n", expression);
-	printf("Postfix notation: ");
-	print(start);
-	printf("\n");
-
-	result = processArray(start, operators);
-
-	(result == -1) ? printf("\nSomething went wrong while proccesing the Array\n") : printf("\nResult after evaluating the expression: %d\n", result);
+	return start;
 }
