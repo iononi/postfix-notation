@@ -159,7 +159,6 @@ void print(Stack *top)
 	print(top->next);
 }
 
-<<<<<<< HEAD
 // Add a new element into the queue. Return 0 if the element was added, return -1 otherwise.
 int add(Stack **start, Stack **end, char ch)
 {
@@ -284,7 +283,6 @@ int popStack(intStack **top)
    Return the expression result if everything went OK, and returns -1 if an error occurr.
 */
 int processArray(Stack *start)
->>>>>>> new-feature
 {
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	intStack *aux = NULL;
