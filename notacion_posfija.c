@@ -46,103 +46,42 @@ void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, 
 intStack *new(int n);
 void pushStack(intStack **top, int n);
 int popStack(intStack **top);
-int processArray(Stack *start, char *operators);
+int processArray(Stack *start);
 bool isNumeric(char ch);
 bool isLetter(char ch);
 int count(Stack *start);
+Stack *postfix(char *expression);
 
 
 int main(int argc, char const *argv[])
 {
 	char expr[MAX_BUFFER];
-	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
-	Stack *top;
-	Stack *start, *end; //to manage it like an queue
-	int result;
-
-	top  = NULL;
-	start = end = NULL;
+	int op, result;
+	Stack *pos;
 
 	printf("Please, write the expression you want to evaluate: ");
 	fgets(expr, MAX_BUFFER, stdin);
 
-	for (int i = 0; i < strlen(expr); ++i)
+	postfix(expr);
+
+	printf("\nWhat do you want to do next?\n%s\n%s\nType an option: ", "1. Get and evaluate postfix notation", "2. Get postfix notation only");
+
+	scanf("%d", &op);
+
+	switch (op)
 	{
-		if ( isNumeric(expr[i]) ) 
-			addDigit(&start, &end, expr[i], expr, &i);
-		if (expr[i] == '(')
-			push(&top, expr[i]);
-		// the current character is an operator
-		if ( in(operators, expr[i]) )
-		{
-			if (isEmpty(top))
-				push(&top, expr[i]);
-			else
-			{
-				// check operator priority level
-				/* if current operator and top element has same priority level, unstack each element and add it
-					to the queue-array until the first condition is met: empty stack, open parenthesis or higher
-					priority operator*/
-				if ( (expr[i] == '+' && returnTop(top) == '-') | (expr[i] == '-' && returnTop(top) == '+') )
-				{
-					fromStackToArray(&top, &start, &end, operators, expr[i]);
-					push(&top, expr[i]);
-					continue;	
-				}
-				if ( (expr[i] == '*' && returnTop(top) == '/') || (expr[i] == '/' && returnTop(top) == '*') )
-				{
-					fromStackToArray(&top, &start, &end, operators, expr[i]);
-					push(&top, expr[i]);
-					continue;	
-				}
-
-				// if the top element has lower priority, push the current element into the stack
-				if ( getIndex(operators, returnTop(top)) < getIndex(operators, expr[i]) )
-				{
-					push(&top, expr[i]);
-					continue;
-				}
-				/*if top element has higher priority, unstack from the stack until stack is empty, lower priority operator, or an open
-				parenthesis is found and add each element to the array, then push the current element*/
-				if ( getIndex(operators, returnTop(top)) >= getIndex(operators, expr[i]) )
-				{
-					fromStackToArray(&top, &start, &end, operators, expr[i]);
-					push(&top, expr[i]);
-				}
-
-			}
-			
-		}
-		if (expr[i] == ')')
-		{
-			char ch_aux;
-			while (!isEmpty(top))
-			{
-				if (returnTop(top) == '(')
-				{
-					pop(&top);
-					break;
-				}
-				ch_aux = pop(&top);
-				add(&start, &end, ch_aux);	
-			}
-		}
+		case 1: pos = postfix(expr);
+				printf("\nInfix notation: %s\n", expr);
+				printf("Postfix notation: "); print(pos);
+				result = processArray(pos);
+				printf( (result == -1) ? "\n\nSomething went wrong while processing postfix notation\n\n" : "\n\nResult after evualating the expression: %d\n\n", result );
+		break;
+		case 2: pos = postfix(expr);
+				printf("\nInfix notation: %s\n", expr);
+				printf("Postfix notation: "); print(pos); printf("\n\n");
+		break;
+		default: printf("\nType a valid option\n");
 	}
-
-	while (!isEmpty(top)) 
-	{	
-		char ch_aux = pop(&top);
-		add(&start, &end, ch_aux);
-	}
-
-	printf("\nInfix notation: %s\n", expr);
-	printf("Postfix notation: ");
-	print(start);
-	printf("\n");
-
-	result = processArray(start, operators);
-
-	(result == -1) ? printf("\nSomething went wrong while proccesing the Array\n") : printf("\nResult after evaluating the expression: %d\n", result);
 
 	return 0;
 }
@@ -220,6 +159,7 @@ void print(Stack *top)
 	print(top->next);
 }
 
+<<<<<<< HEAD
 // Add a new element into the queue. Return 0 if the element was added, return -1 otherwise.
 int add(Stack **start, Stack **end, char ch)
 {
@@ -343,8 +283,10 @@ int popStack(intStack **top)
    and get the full number. If the number has no linked nodes, it just push it into the stack.
    Return the expression result if everything went OK, and returns -1 if an error occurr.
 */
-int processArray(Stack *start, char *operators)
+int processArray(Stack *start)
+>>>>>>> new-feature
 {
+	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	intStack *aux = NULL;
 	int n1, n2, result = 0;
 	char *temp;
@@ -419,4 +361,87 @@ int count(Stack *start)
 	if (isEmpty(start))
 		return 0;
 	return 1 + count(start->digit);
+}
+
+// Get postfix notation from expression, that may be given in infix notation to work correctly.
+Stack *postfix(char *expression)
+{
+	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
+	Stack *top;
+	Stack *start, *end; //to manage it like an queue
+	int result;
+
+	top = start = end = NULL;
+	for (int i = 0; i < strlen(expression); ++i)
+	{
+		if ( isNumeric(expression[i]) ) 
+			addDigit(&start, &end, expression[i], expression, &i);
+		if ( isLetter(expression[i]) )
+			add(&start, &end, expression[i]);
+		if (expression[i] == '(')
+			push(&top, expression[i]);
+		// the current character is an operator
+		if ( in(operators, expression[i]) )
+		{
+			if (isEmpty(top))
+				push(&top, expression[i]);
+			else
+			{
+				// check operator priority level
+				/* if current operator and top element has same priority level, unstack each element and add it
+					to the queue-array until the first condition is met: empty stack, open parenthesis or higher
+					priority operator*/
+				if ( (expression[i] == '+' && returnTop(top) == '-') | (expression[i] == '-' && returnTop(top) == '+') )
+				{
+					fromStackToArray(&top, &start, &end, operators, expression[i]);
+					push(&top, expression[i]);
+					continue;	
+				}
+				if ( (expression[i] == '*' && returnTop(top) == '/') || (expression[i] == '/' && returnTop(top) == '*') )
+				{
+					fromStackToArray(&top, &start, &end, operators, expression[i]);
+					push(&top, expression[i]);
+					continue;	
+				}
+
+				// if the top element has lower priority, push the current element into the stack
+				if ( getIndex(operators, returnTop(top)) < getIndex(operators, expression[i]) )
+				{
+					push(&top, expression[i]);
+					continue;
+				}
+				/*if top element has higher priority, unstack from the stack until stack is empty, lower priority operator, or an open
+				parenthesis is found and add each element to the array, then push the current element*/
+				if ( getIndex(operators, returnTop(top)) >= getIndex(operators, expression[i]) )
+				{
+					fromStackToArray(&top, &start, &end, operators, expression[i]);
+					push(&top, expression[i]);
+				}
+
+			}
+			
+		}
+		if (expression[i] == ')')
+		{
+			char ch_aux;
+			while (!isEmpty(top))
+			{
+				if (returnTop(top) == '(')
+				{
+					pop(&top);
+					break;
+				}
+				ch_aux = pop(&top);
+				add(&start, &end, ch_aux);	
+			}
+		}
+	}
+
+	while (!isEmpty(top)) 
+	{	
+		char ch_aux = pop(&top);
+		add(&start, &end, ch_aux);
+	}
+
+	return start;
 }
