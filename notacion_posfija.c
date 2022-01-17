@@ -28,7 +28,7 @@ typedef struct NodeStack
 //struct for an int stack
 typedef struct eStack
 {
-	int data;
+	float data;
 	struct eStack *next;
 }intStack;
 
@@ -43,9 +43,9 @@ void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
 bool in(char *array, char ch);
 int getIndex(char *array, char ch);
 void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, char operator);
-intStack *new(int n);
-void pushStack(intStack **top, int n);
-int popStack(intStack **top);
+intStack *new(float n);
+void pushStack(intStack **top, float n);
+float popStack(intStack **top);
 int processArray(Stack *start);
 bool isNumeric(char ch);
 bool isLetter(char ch);
@@ -232,7 +232,7 @@ void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, 
 }
 
 // Allocates memory for an intStack node. Return the new node if allocation was successful, return NULL otherwise.
-intStack *new(int n)
+intStack *new(float n)
 {
 	intStack *new = (intStack *) malloc(sizeof(intStack));
 	if (!new)
@@ -245,8 +245,8 @@ intStack *new(int n)
 	return new;
 }
 
-// Insert a new element into the int stack.
-void pushStack(intStack **top, int n)
+// Insert a new element into the float stack.
+void pushStack(intStack **top, float n)
 {
 	intStack *newNode = new(n);
 	if (!newNode)
@@ -260,7 +260,7 @@ void pushStack(intStack **top, int n)
 }
 
 // Delete the top element from the int stack and return it. Return -1 otherwise.
-int popStack(intStack **top)
+float popStack(intStack **top)
 {
 	if (*top == NULL)
 	{
@@ -268,7 +268,7 @@ int popStack(intStack **top)
 		return -1;
 	}
 	intStack *toDelete = *top;
-	int n = toDelete->data;
+	float n = toDelete->data;
 	*top = (*top)->next;
 	free(toDelete);
 	return n;
@@ -285,7 +285,7 @@ int processArray(Stack *start)
 {
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	intStack *aux = NULL;
-	int n1, n2, result = 0;
+	float n1, n2, result = 0;
 	char *temp;
 
 	while (!isEmpty(start))
@@ -302,7 +302,7 @@ int processArray(Stack *start)
 			}
 			strncat(temp, &start->data, 1);
 			if ( (start->next)->digit == NULL )
-			{ start = start->next; strncat(temp, &start->data, 1); pushStack(&aux, atoi(temp)); start = start->next; free(temp); break; }
+			{ start = start->next; strncat(temp, &start->data, 1); pushStack(&aux, atof(temp)); start = start->next; free(temp); break; }
 			start = start->digit;
 			allocate = false;
 		}
