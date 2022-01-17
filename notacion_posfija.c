@@ -46,7 +46,7 @@ void fromStackToArray(Stack **top, Stack **start, Stack **end, char *operators, 
 intStack *new(float n);
 void pushStack(intStack **top, float n);
 float popStack(intStack **top);
-int processArray(Stack *start);
+float processArray(Stack *start);
 bool isNumeric(char ch);
 bool isLetter(char ch);
 int count(Stack *start);
@@ -57,8 +57,8 @@ int main(int argc, char const *argv[])
 {
 	char expr[MAX_BUFFER];
 	Stack *pos;
-	int result, op;
-	
+	int op;
+	float result;	
 
 	printf("Please, write the expression you want to evaluate: ");
 	fgets(expr, MAX_BUFFER, stdin);
@@ -73,7 +73,7 @@ int main(int argc, char const *argv[])
 				printf("\nInfix notation: %s\n", expr);
 				printf("Postfix notation: "); print(pos);
 				result = processArray(pos);
-				printf( (result == -1) ? "\n\nSomething went wrong while processing postfix notation\n\n" : "\n\nResult after evualating the expression: %d\n\n", result );
+				printf( (result == -1) ? "\n\nSomething went wrong while processing postfix notation\n\n" : "\n\nResult after evualating the expression: %.2f\n\n", result );
 		break;
 		case 2: pos = postfix(expr);
 				printf("\nInfix notation: %s\n", expr);
@@ -281,7 +281,7 @@ float popStack(intStack **top)
    and get the full number. If the number has no linked nodes, it just push it into the stack.
    Return the expression result if everything went OK, and returns -1 if an error occurr.
 */
-int processArray(Stack *start)
+float processArray(Stack *start)
 {
 	char operators[] = {'-', '+', '/', '*', '^', '\0'}; //from left to right, less priority to higher priority
 	intStack *aux = NULL;
