@@ -63,8 +63,6 @@ int main(int argc, char const *argv[])
 	printf("Please, write the expression you want to evaluate: ");
 	fgets(expr, MAX_BUFFER, stdin);
 
-	postfix(expr);
-
 	printf("\nWhat do you want to do next?\n%s\n%s\nType an option: ", "1. Get and evaluate postfix notation", "2. Get postfix notation only");
 
 	scanf("%d", &op);
@@ -347,7 +345,7 @@ bool isNumeric(char ch)
 // Return true if character ch is in range a-z or A-Z, return false otherwise.
 bool isLetter(char ch)
 {
-	if ( (ch >= 65 && ch <= 90) | (ch >= 97 && ch <= 122) )
+	if ( (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) )
 		return true;
 	return false;
 }
@@ -370,10 +368,11 @@ Stack *postfix(char *expression)
 	Stack *start, *end; //to manage it like an queue
 	int result;
 
-	top  = NULL;
-	start = end = NULL;
+	top = start = end = NULL;
 	for (int i = 0; i < strlen(expression); ++i)
 	{
+		if ( isLetter(expression[i]) | expression[i] == '.' )
+			add(&start, &end, expression[i]);
 		if ( isNumeric(expression[i]) ) 
 			addDigit(&start, &end, expression[i], expression, &i);
 		if (expression[i] == '(')
@@ -440,6 +439,5 @@ Stack *postfix(char *expression)
 		char ch_aux = pop(&top);
 		add(&start, &end, ch_aux);
 	}
-
 	return start;
 }
