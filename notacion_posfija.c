@@ -183,7 +183,7 @@ void addDigit(Stack **start, Stack **end, char ch, char *expression, int *index)
 		printf("\nCannot add the element into the queue.\n");
 		return;
 	}
-	while ( isNumeric(expression[(*index) + 1]) )
+	while ( isNumeric(expression[(*index) + 1]) || expression[(*index) + 1] == '.')
 		{
 			(*end)->digit = newElement(expression[(*index) + 1]);
 			if (!(*end)->digit)
