@@ -205,7 +205,7 @@ float processArray(Stack *start)
 
 	while (!isEmpty(start))
 	{
-		bool allocate = true;
+		bool allocate = true, next = false;
 		while ( start->digit != NULL )
 		{
 			if (allocate)
@@ -217,12 +217,13 @@ float processArray(Stack *start)
 			}
 			strncat(temp, &start->data, 1);
 			if ( (start->next)->digit == NULL )
-			{ start = start->next; strncat(temp, &start->data, 1); pushStack(&aux, atof(temp)); start = start->next; free(temp); break; }
+			{ start = start->next; strncat(temp, &start->data, 1); pushStack(&aux, atof(temp)); next = true; free(temp); break; }
 			start = start->digit;
 			allocate = false;
 		}
+        if (next) { start = start->next; continue; }
 		if ( isNumeric(start->data) )
-			pushStack(&aux, atoi(&start->data));
+			pushStack(&aux, atof(&start->data));
 		if ( in(operators, start->data) )
 		{ 
 			n1 = popStack(&aux); n2 = popStack(&aux);
