@@ -15,12 +15,25 @@
 #define MAX_BUFFER 100
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 	char expr[MAX_BUFFER];
 	Stack *pos;
 	int op;
-	float result;	
+	float result;
+
+	if (  argc != 0 )
+	{
+		for (int i = 0; i < argc - 1; i++)
+		{
+			pos = postfix( argv[i + 1] );
+			printf("Infix notation: %s\n", argv[i + 1]);
+			printf("Postfix notation: "); print(pos);
+			result = processArray(pos);
+			printf( (result == -1) ? "\n\nSomething went wrong while processing postfix notation\n\n" : "\n\nResult after evaluating the expression: %.2f\n\n", result );
+			delStackQueue(&pos);
+		}
+	}
 
 	printf("Please, write the expression you want to evaluate: ");
 	fgets(expr, MAX_BUFFER, stdin);
@@ -35,7 +48,7 @@ int main(int argc, char const *argv[])
 				printf("\nInfix notation: %s\n", expr);
 				printf("Postfix notation: "); print(pos);
 				result = processArray(pos);
-				printf( (result == -1) ? "\n\nSomething went wrong while processing postfix notation\n\n" : "\n\nResult after evualating the expression: %.2f\n\n", result );
+				printf( (result == -1) ? "\n\nSomething went wrong while processing postfix notation\n\n" : "\n\nResult after evaluating the expression: %.2f\n\n", result );
 		break;
 		case 2: pos = postfix(expr);
 				printf("\nInfix notation: %s\n", expr);
