@@ -40,6 +40,7 @@ bool isNumeric(char ch);
 bool isLetter(char ch);
 int count(Stack *start);
 Stack *postfix(char *expression);
+void delStackQueue(Stack **start);
 
 #include "stack.c"
 #endif

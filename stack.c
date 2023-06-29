@@ -356,3 +356,13 @@ Stack *postfix(char *expression)
 	}
 	return start;
 }
+
+// Deallocate the memory allcated by add and addDigit functions iteratively
+void delStackQueue(Stack **start)
+{
+	Stack *aux = NULL;
+	while ( !isEmpty(*start) )
+	{
+		aux = *start; *start = aux->next; free(aux);
+	}
+}
